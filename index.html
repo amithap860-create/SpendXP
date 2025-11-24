@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Social Sharing / Open Graph Tags -->
+    <title>SpendXP - Level Up Your Money</title>
+    <meta name="description" content="A gamified financial literacy app for teens. Track spending, set goals, and earn XP to master your money." />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SpendXP - Level Up Your Money" />
+    <meta property="og:description" content="Track spending, complete quests, and master your financial skills in this gamified finance app." />
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/1611/1611179.png" />
+    <meta name="theme-color" content="#023047" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --color-background: #f0f9ff; /* sky-50 */
+        --color-text: #023047;
+        --color-text-secondary: #005a8f;
+        --color-card-bg: #ffffff;
+        --color-card-bg-light: #e0f2fe; /* sky-100 */
+        --color-border: #dbeafe; /* blue-200 */
+
+        --color-green: #10b981;
+        --color-yellow: #f59e0b;
+        --color-purple: #8b5cf6;
+        --color-pink: #ec4899;
+        --color-teal: #14b8a6;
+      }
+      html.dark {
+        --color-background: #023047;
+        --color-text: #ffffff;
+        --color-text-secondary: #a0d6f4;
+        --color-card-bg: #00426A;
+        --color-card-bg-light: #005a8f;
+        --color-border: #005a8f;
+
+        --color-green: #10b981;
+        --color-yellow: #f59e0b;
+        --color-purple: #8b5cf6;
+        --color-pink: #ec4899;
+        --color-teal: #14b8a6;
+      }
+      body {
+          background-color: var(--color-background);
+          color: var(--color-text);
+          transition: background-color 0.3s ease, color 0.3s ease;
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'brand-blue': 'var(--color-card-bg)',
+              'brand-blue-light': 'var(--color-card-bg-light)',
+              'brand-green': 'var(--color-green)',
+              'brand-yellow': 'var(--color-yellow)',
+              'brand-purple': 'var(--color-purple)',
+              'brand-pink': 'var(--color-pink)',
+              'brand-teal': 'var(--color-teal)',
+              'brand-background': 'var(--color-background)',
+              'brand-text': 'var(--color-text)',
+              'brand-text-secondary': 'var(--color-text-secondary)'
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.29.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.4.1"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
