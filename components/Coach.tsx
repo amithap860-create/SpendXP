@@ -19,6 +19,7 @@ const Coach: React.FC = () => {
     // Securely retrieve API Key: Support both Vite (import.meta.env) and Legacy/Node (process.env)
     const getApiKey = () => {
         try {
+            // Check for Vite environment variable first
             // @ts-ignore
             if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_KEY) {
                 // @ts-ignore
@@ -27,7 +28,17 @@ const Coach: React.FC = () => {
         } catch (e) {
             // Ignore error if import.meta is not available
         }
-        return process.env.API_KEY;
+        
+        // Safe check for process.env (prevents crash if process is undefined)
+        try {
+            if (typeof process !== 'undefined' && process.env?.API_KEY) {
+                return process.env.API_KEY;
+            }
+        } catch (e) {
+            // Ignore
+        }
+        
+        return undefined;
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

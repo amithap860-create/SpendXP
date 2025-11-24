@@ -48,7 +48,16 @@ const Investments: React.FC<InvestmentsProps> = ({ user, investments, onAddInves
         } catch (e) {
             // Ignore
         }
-        return process.env.API_KEY;
+        
+        // Safe check for process.env
+        try {
+            if (typeof process !== 'undefined' && process.env?.API_KEY) {
+                return process.env.API_KEY;
+            }
+        } catch (e) {
+            // Ignore
+        }
+        return undefined;
     };
 
     useEffect(() => {
