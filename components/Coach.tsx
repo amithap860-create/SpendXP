@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import Card from './shared/Card';
 import Button from './shared/Button';
@@ -11,22 +11,60 @@ const Coach: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     
-    // In a real app, this would be a secure environment variable
-    const API_KEY = process.env.API_KEY;
+    // Security: Rate Limiting
+    const lastRequestTime = useRef<number>(0);
+    const COOLDOWN_MS = 5000; // 5 seconds between requests
+    const MAX_CHAR_LIMIT = 200; // Prevent massive token consumption
+
+    // Securely retrieve API Key: Support both Vite (import.meta.env) and Legacy/Node (process.env)
+    const getApiKey = () => {
+        try {
+            // @ts-ignore
+            if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_KEY) {
+                // @ts-ignore
+                return import.meta.env.VITE_API_KEY;
+            }
+        } catch (e) {
+            // Ignore error if import.meta is not available
+        }
+        return process.env.API_KEY;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!prompt.trim() || !API_KEY) {
-            setError('Please enter a question and ensure API key is available.');
+        setError('');
+        
+        const apiKey = getApiKey();
+
+        if (!apiKey) {
+            setError('System Error: API Key is missing. Please check your Vercel Environment Variables (VITE_API_KEY).');
+            return;
+        }
+
+        if (!prompt.trim()) {
+            setError('Please enter a question.');
+            return;
+        }
+
+        // Security Check: Input Sanitization
+        if (prompt.length > MAX_CHAR_LIMIT) {
+            setError(`Question is too long. Please keep it under ${MAX_CHAR_LIMIT} characters.`);
+            return;
+        }
+
+        // Security Check: Rate Limiting
+        const now = Date.now();
+        if (now - lastRequestTime.current < COOLDOWN_MS) {
+            setError('Whoa, slow down! Let XP think for a second. 🧠');
             return;
         }
 
         setIsLoading(true);
         setResponse('');
-        setError('');
+        lastRequestTime.current = now;
 
         try {
-            const ai = new GoogleGenAI({ apiKey: API_KEY });
+            const ai = new GoogleGenAI({ apiKey: apiKey });
             
             const systemInstruction = "You are a friendly and cool financial coach for teenagers. Your name is 'XP'. Explain financial concepts in a simple, relatable way using analogies they would understand (like gaming, social media, or snacks). Keep your answers short, engaging, and easy to read. Use emojis to make it fun. Always be encouraging and positive.";
 
@@ -56,14 +94,20 @@ const Coach: React.FC = () => {
             
             <Card>
                 <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2">
-                    <input
-                        type="text"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
-                        placeholder="e.g., What is 'interest'?"
-                        className="w-full flex-grow bg-brand-blue-light border-2 border-transparent focus:border-brand-purple focus:ring-0 rounded-md px-3 py-2"
-                        disabled={isLoading}
-                    />
+                    <div className="w-full relative">
+                        <input
+                            type="text"
+                            value={prompt}
+                            onChange={(e) => setPrompt(e.target.value)}
+                            placeholder="e.g., What is 'interest'?"
+                            className="w-full bg-brand-blue-light border-2 border-transparent focus:border-brand-purple focus:ring-0 rounded-md px-3 py-2 pr-16"
+                            disabled={isLoading}
+                            maxLength={MAX_CHAR_LIMIT}
+                        />
+                        <span className="absolute right-2 top-1/2 transform -translate-y-1/2 text-xs text-brand-text-secondary opacity-50">
+                            {prompt.length}/{MAX_CHAR_LIMIT}
+                        </span>
+                    </div>
                     <Button type="submit" variant="primary" disabled={isLoading}>
                         {isLoading ? 'Thinking...' : 'Ask'}
                     </Button>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { User, Investment, InvestmentModule } from '../types';
 import { CURRENCIES, formatCurrency, INVESTMENT_MODULES } from '../constants';
@@ -33,10 +33,23 @@ const Investments: React.FC<InvestmentsProps> = ({ user, investments, onAddInves
     const [analyzingStock, setAnalyzingStock] = useState<Investment | null>(null);
     const [analysisResult, setAnalysisResult] = useState<string | null>(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+    // Security: Rate Limit for Analysis
+    const lastAnalysisTime = useRef<number>(0);
     
-    // Module State
-    const [activeModule, setActiveModule] = useState<InvestmentModule | null>(null);
-    const [quizStatus, setQuizStatus] = useState<'reading' | 'quiz' | 'success'>('reading');
+    // Securely retrieve API Key: Support both Vite (import.meta.env) and Legacy/Node (process.env)
+    const getApiKey = () => {
+        try {
+            // @ts-ignore
+            if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_KEY) {
+                // @ts-ignore
+                return import.meta.env.VITE_API_KEY;
+            }
+        } catch (e) {
+            // Ignore
+        }
+        return process.env.API_KEY;
+    };
 
     useEffect(() => {
         if (isPortfolioLocked && activeTab === 'portfolio') {
@@ -63,16 +76,24 @@ const Investments: React.FC<InvestmentsProps> = ({ user, investments, onAddInves
     const handleAnalyzeStock = async (investment: Investment) => {
         if (!investment.ticker && !investment.accountName) return;
         
+        // Security: Rate Limiting
+        const now = Date.now();
+        if (now - lastAnalysisTime.current < 5000) {
+            alert("Please wait a few seconds before requesting another analysis.");
+            return;
+        }
+        
+        const apiKey = getApiKey();
+        if (!apiKey) {
+            setAnalyzingStock(investment); // Open modal to show error
+            setAnalysisResult("System Error: API Key not found. Please check your configuration.");
+            return;
+        }
+
         setAnalyzingStock(investment);
         setAnalysisResult(null);
         setIsAnalyzing(true);
-        
-        const apiKey = process.env.API_KEY;
-        if (!apiKey) {
-            setAnalysisResult("API Key not found. Cannot generate report. Please check your environment variables.");
-            setIsAnalyzing(false);
-            return;
-        }
+        lastAnalysisTime.current = now;
 
         try {
              const ai = new GoogleGenAI({ apiKey: apiKey });
@@ -122,6 +143,10 @@ const Investments: React.FC<InvestmentsProps> = ({ user, investments, onAddInves
     };
 
     const totalValue = investments.reduce((sum, inv) => sum + inv.currentValue, 0);
+
+    // Module State
+    const [activeModule, setActiveModule] = useState<InvestmentModule | null>(null);
+    const [quizStatus, setQuizStatus] = useState<'reading' | 'quiz' | 'success'>('reading');
 
     return (
         <div className="animate-fade-in space-y-6">

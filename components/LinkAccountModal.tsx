@@ -162,7 +162,7 @@ const LinkAccountModal: React.FC<LinkAccountModalProps> = ({ onClose, onLink, cu
         )}
 
         {step === 'credentials' && selectedBank && (
-            <form onSubmit={handleConnect} className="space-y-4">
+            <form onSubmit={handleConnect} className="space-y-4" autoComplete="off">
                 <div className="text-center mb-6">
                     <div className="text-4xl mb-2">{selectedBank.icon}</div>
                     <h3 className="font-bold text-xl">Log in to {selectedBank.name}</h3>
@@ -175,6 +175,7 @@ const LinkAccountModal: React.FC<LinkAccountModalProps> = ({ onClose, onLink, cu
                         onChange={(e) => setUsername(e.target.value)}
                         className="w-full bg-brand-blue-light border-2 border-transparent focus:border-brand-green focus:ring-0 rounded-md px-3 py-2"
                         required
+                        autoComplete="off"
                     />
                 </div>
                 <div>
@@ -185,6 +186,7 @@ const LinkAccountModal: React.FC<LinkAccountModalProps> = ({ onClose, onLink, cu
                         onChange={(e) => setPassword(e.target.value)}
                         className="w-full bg-brand-blue-light border-2 border-transparent focus:border-brand-green focus:ring-0 rounded-md px-3 py-2"
                         required
+                        autoComplete="new-password"
                     />
                 </div>
                 <div className="flex gap-3 mt-6">
